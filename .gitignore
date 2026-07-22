@@ -1,0 +1,9 @@
+# Python编码缓存与字节码
+_pycache_/
+*.py[cod]
+*$py.class
+# 敏感配置
+.env
+# 数据库文件
+*.db
+*.sqlite3
