@@ -2,3 +2,14 @@ langchain-core~=1.3.2
 langchain-community~=0.4.1
 PyYAML~=6.0.3
 fastapi
+passlib
+python-jose
+sqlalchemy
+pydantic
+langchain
+httpx
+pydantic-settings
+pydantic-settings
+langchain-text-splitters
+langchain-chroma
+redis==8.0.1
