@@ -70,14 +70,15 @@ async def verify_token(token:str,redis_client:redis.Redis=Depends(get_redis_clie
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/login")# 实现OAuth2密码授权模式的一个安全工具
 async def get_current_user(
         token: str = Depends(oauth2_scheme),#
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
+        redis_client: redis.Redis = Depends(get_redis_client)
 ):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Token 验证失败",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    token_data = await verify_token(token)
+    token_data = await verify_token(token,redis_client)
     if not token_data:
         raise credentials_exception
     user = await get_user_by_id(db, token_data.user_id)

@@ -36,7 +36,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends() ,db:AsyncSessio
                                             )
     refresh_token = await crud.create_refresh_token(data={"sub": str(user.id)})
     user_id = str(user.id)
-    await redis_client.set(f"refresh:token:{user_id}",value="1",ex = 3600)
+    await redis_client.set(f"refresh:token:{user_id}",value="1",ex = settings.REFRESH_TOKEN_EXPIRE_DAYS*86400)
     return {
         "message":"登录成功",
         "user_id":str(user.id),
@@ -79,13 +79,14 @@ async def logout(redis_client:redis.Redis=Depends(get_redis_client),token: str =
     token_data = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
     exp = token_data.get("exp")
     now = datetime.now(timezone.utc).timestamp()
-    expire = int(now-exp)
+    expire = int(exp-now)
     user_id = token_data.get("sub")
     if expire > 0:
-        await redis_client.set(f"blacklist:{token}","1",expire,)
+        await redis_client.set(f"blacklist:{token}",value="1",ex=expire)
     await redis_client.delete(f"refresh:token:{user_id}")
     return {
-        "message": "退出成功"
+        "message": "退出成功",
+        "expire":exp
     }
 # 获取用户信息
 @router.get("/info")
